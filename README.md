@@ -2,11 +2,11 @@
 Student: MUCYO Fabrice
 Student ID: 29085
 
-Business Problem
+## Business Problem
 
 This project analyzes sales data for a retail company to identify top products per region, track monthly revenue trends, and segment customers for targeted marketing. The goal is to provide actionable insights to improve sales strategies and customer engagement.
 
-Database Schema
+## Database Schema
 
 The project uses three related tables:
 
@@ -40,7 +40,7 @@ amount
 
 An ER diagram is included in the screenshots/ folder.
 
-SQL JOINs
+## SQL JOINs
 
 INNER JOIN: Retrieves transactions for valid customers and products.
 
@@ -67,3 +67,22 @@ Navigation Functions: LAG(), LEAD() — compare month-to-month performance.
 Distribution Functions: NTILE(4), CUME_DIST() — segment customers by spending quartiles.
 
 All functions include SQL scripts, screenshots, and interpretations.
+Results Analysis
+
+Descriptive: Revenue increased steadily from January to March; top customers generate most sales; some products dominate specific regions.
+
+Diagnostic: Seasonal demand, regional promotions, and frequent purchases explain trends.
+
+Prescriptive: Focus campaigns on top customers, ensure stock for best-selling products, and consider promotions for slow-moving items.
+
+## References
+
+Oracle Documentation – https://docs.oracle.com
+
+W3Schools SQL Tutorial – https://www.w3schools.com/sql/
+
+GeeksforGeeks – SQL Window Functions – https://www.geeksforgeeks.org/sql-window-functions/
+
+## Academic Integrity Statement
+
+All sources were properly cited. Implementations and analysis represent original work. No AI-generated content was copied without adaptation.

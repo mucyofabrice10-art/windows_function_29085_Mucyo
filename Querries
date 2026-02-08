@@ -191,3 +191,15 @@ FROM transactions t
 JOIN products p ON t.product_id = p.product_id
 ORDER BY t.transaction_date;
 
+AVG()
+
+SELECT
+    t.transaction_date,
+    (t.quantity * p.price) AS transaction_amount,
+    AVG(t.quantity * p.price) OVER (
+        ORDER BY t.transaction_date
+        RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS cumulative_avg
+FROM transactions t
+JOIN products p ON t.product_id = p.product_id
+ORDER BY t.transaction_date;

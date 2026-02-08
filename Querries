@@ -1,0 +1,208 @@
+```sql
+  CREATE TABLE customers (
+    customer_id NUMBER(5) PRIMARY KEY,
+    customer_name VARCHAR2(50),
+    region VARCHAR2(20),
+    registration_date DATE
+);
+
+INSERT INTO customers VALUES (1, 'Alice', 'East', DATE '2024-01-10');
+INSERT INTO customers VALUES (2, 'Bob', 'West', DATE '2024-02-15');
+INSERT INTO customers VALUES (3, 'Chris', 'East', DATE '2024-03-12');
+INSERT INTO customers VALUES (4, 'Diana', 'North', DATE '2024-04-01');
+INSERT INTO customers VALUES (5, 'Ethan', 'South', DATE '2024-05-20');
+INSERT INTO customers VALUES (6, 'Fiona', 'West', DATE '2024-06-15');
+INSERT INTO customers VALUES (7, 'George', 'East', DATE '2024-07-10');
+INSERT INTO customers VALUES (8, 'Hannah', 'North', DATE '2024-08-05');
+INSERT INTO customers VALUES (9, 'Ian', 'South', DATE '2024-09-12');
+INSERT INTO customers VALUES (10, 'Julia', 'West', DATE '2024-10-01');
+
+CREATE TABLE products (
+    product_id NUMBER(5) PRIMARY KEY,
+    product_name VARCHAR2(50),
+    category VARCHAR2(30),
+    unit_price NUMBER(10,2)
+);
+
+-- Sample Data
+INSERT INTO products VALUES (101, 'Laptop', 'Electronics', 1200);
+INSERT INTO products VALUES (102, 'Smartphone', 'Electronics', 800);
+INSERT INTO products VALUES (103, 'Tablet', 'Electronics', 500);
+INSERT INTO products VALUES (104, 'Headphones', 'Accessories', 150);
+INSERT INTO products VALUES (105, 'Camera', 'Electronics', 900);
+INSERT INTO products VALUES (106, 'Keyboard', 'Accessories', 60);
+INSERT INTO products VALUES (107, 'Mouse', 'Accessories', 40);
+INSERT INTO products VALUES (108, 'Monitor', 'Electronics', 300);
+INSERT INTO products VALUES (109, 'Printer', 'Electronics', 200);
+INSERT INTO products VALUES (110, 'Charger', 'Accessories', 25);
+
+CREATE TABLE transactions (
+    transaction_id NUMBER(5) PRIMARY KEY,
+    customer_id NUMBER(5),
+    product_id NUMBER(5),
+    transaction_date DATE,
+    quantity NUMBER(5),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+-- Sample Data
+INSERT INTO transactions VALUES (1001, 1, 101, DATE '2024-01-15', 2);
+INSERT INTO transactions VALUES (1002, 2, 102, DATE '2024-02-20', 1);
+INSERT INTO transactions VALUES (1003, 3, 103, DATE '2024-03-18', 3);
+INSERT INTO transactions VALUES (1004, 4, 104, DATE '2024-04-05', 2);
+INSERT INTO transactions VALUES (1005, 5, 105, DATE '2024-05-25', 1);
+INSERT INTO transactions VALUES (1006, 6, 101, DATE '2024-06-12', 1);
+INSERT INTO transactions VALUES (1007, 7, 102, DATE '2024-07-20', 2);
+INSERT INTO transactions VALUES (1008, 8, 103, DATE '2024-08-15', 1);
+INSERT INTO transactions VALUES (1009, 9, 104, DATE '2024-09-10', 4);
+INSERT INTO transactions VALUES (1010, 10, 105, DATE '2024-10-01', 2);
+INSERT INTO transactions VALUES (1011, 1, 106, DATE '2024-01-20', 1);
+INSERT INTO transactions VALUES (1012, 2, 107, DATE '2024-02-25', 3);
+INSERT INTO transactions VALUES (1013, 3, 108, DATE '2024-03-22', 1);
+INSERT INTO transactions VALUES (1014, 4, 109, DATE '2024-04-12', 2);
+INSERT INTO transactions VALUES (1015, 5, 110, DATE '2024-05-28', 5);
+
+
+SELECT region,
+       product_name,
+       total_sold,
+       rank_per_region
+FROM (
+    SELECT c.region,
+           p.product_name,
+           SUM(t.quantity) AS total_sold,
+           RANK() OVER (PARTITION BY c.region ORDER BY SUM(t.quantity) DESC) AS rank_per_region
+    FROM transactions t
+    JOIN customers c ON t.customer_id = c.customer_id
+    JOIN products p ON t.product_id = p.product_id
+    GROUP BY c.region, p.product_name
+) ranked_products
+WHERE rank_per_region <= 5
+ORDER BY region, rank_per_region;
+
+
+
+
+-- Assign a unique row number to each product per region
+SELECT region,
+       product_name,
+       total_sold,
+       ROW_NUMBER() OVER (PARTITION BY region ORDER BY total_sold DESC) AS row_num
+FROM (
+    SELECT c.region,
+           p.product_name,
+           SUM(t.quantity) AS total_sold
+    FROM transactions t
+    JOIN customers c ON t.customer_id = c.customer_id
+    JOIN products p ON t.product_id = p.product_id
+    GROUP BY c.region, p.product_name
+) sub
+ORDER BY region, row_num;
+
+
+
+
+
+
+DENSE
+
+SELECT region,
+       product_name,
+       total_sold,
+       DENSE_RANK() OVER (PARTITION BY region ORDER BY total_sold DESC) AS dense_rank_region
+FROM (
+    SELECT c.region,
+           p.product_name,
+           SUM(t.quantity) AS total_sold
+    FROM transactions t
+    JOIN customers c ON t.customer_id = c.customer_id
+    JOIN products p ON t.product_id = p.product_id
+    GROUP BY c.region, p.product_name
+) sub
+ORDER BY region, dense_rank_region;
+
+
+
+
+
+PERCENTAGE RANK
+SELECT region,
+       product_name,
+       total_sold,
+       PERCENT_RANK() OVER (PARTITION BY region ORDER BY total_sold DESC) AS percent_rank_region
+FROM (
+    SELECT c.region,
+           p.product_name,
+           SUM(t.quantity) AS total_sold
+    FROM transactions t
+    JOIN customers c ON t.customer_id = c.customer_id
+    JOIN products p ON t.product_id = p.product_id
+    GROUP BY c.region, p.product_name
+) sub
+ORDER BY region, percent_rank_region;
+
+
+
+
+
+
+SELECT 
+    transaction_date,
+    daily_sales,
+    MIN(daily_sales) OVER (
+        ORDER BY transaction_date
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS min_last_3,
+    MAX(daily_sales) OVER (
+        ORDER BY transaction_date
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS max_last_3,
+    SUM(daily_sales) OVER (
+        ORDER BY transaction_date
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS sum_last_3,
+    AVG(daily_sales) OVER (
+        ORDER BY transaction_date
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS avg_last_3
+FROM (
+    SELECT transaction_date,
+           SUM(quantity * p.UNIT_PRICE) AS daily_sales
+    FROM transactions t
+    JOIN products p ON t.product_id = p.product_id
+    GROUP BY transaction_date
+) sub
+ORDER BY transaction_date;
+
+
+
+
+
+-- 1. Month-over-Month Sales Growth using LAG()
+SELECT 
+    sales_month,
+    monthly_sales,
+    -- Fetch the sales figure from the previous row (previous month)
+    LAG(monthly_sales) OVER (ORDER BY sales_month) AS prev_month_sales,
+    -- Calculate the absolute growth (current - previous)
+    monthly_sales - LAG(monthly_sales) OVER (ORDER BY sales_month) AS sales_growth_abs,
+    -- Calculate the percentage growth
+    ROUND(
+        ((monthly_sales - LAG(monthly_sales) OVER (ORDER BY sales_month)) 
+         / LAG(monthly_sales) OVER (ORDER BY sales_month)) * 100, 
+        2
+    ) AS sales_growth_pct
+FROM (
+    -- First, calculate total sales per month
+    SELECT 
+        TO_CHAR(t.transaction_date, 'YYYY-MM') AS sales_month,
+        SUM(t.quantity * p.unit_price) AS monthly_sales
+    FROM transactions t
+    JOIN products p ON t.product_id = p.product_id
+    GROUP BY TO_CHAR(t.transaction_date, 'YYYY-MM')
+) monthly_data
+ORDER BY sales_month;
+
+
+

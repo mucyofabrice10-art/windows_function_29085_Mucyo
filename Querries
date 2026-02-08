@@ -273,7 +273,6 @@ ORDER BY t.customer_id, transaction_rank;
 
 
 ##ROWS()
--- Running total of LAST 3 rows including current
 SELECT
     t.transaction_date,
     (t.quantity * p.price) AS amount,
@@ -281,6 +280,19 @@ SELECT
         ORDER BY t.transaction_date
         ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
     ) AS last_3_days_sum
+FROM transactions t
+JOIN products p ON t.product_id = p.product_id
+ORDER BY t.transaction_date;
+
+##RANGE()
+-- Sum of all rows with SAME DATE as current row
+SELECT
+    t.transaction_date,
+    (t.quantity * p.price) AS amount,
+    SUM(t.quantity * p.price) OVER (
+        ORDER BY t.transaction_date
+        RANGE BETWEEN CURRENT ROW AND CURRENT ROW
+    ) AS daily_total
 FROM transactions t
 JOIN products p ON t.product_id = p.product_id
 ORDER BY t.transaction_date;

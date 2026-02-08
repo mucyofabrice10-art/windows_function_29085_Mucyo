@@ -311,3 +311,22 @@ FROM transactions t
 INNER JOIN customers c ON t.customer_id = c.customer_id
 INNER JOIN products p ON t.product_id = p.product_id
 ORDER BY t.transaction_date DESC;
+
+##LEFT JOIN
+SELECT
+    c.customer_id,
+    c.customer_name,
+    COUNT(t.transaction_id) AS transaction_count,
+    COALESCE(SUM(t.quantity * p.price), 0) AS total_spent,
+    CASE 
+        WHEN COUNT(t.transaction_id) = 0 THEN 'Inactive'
+        WHEN COUNT(t.transaction_id) <= 3 THEN 'Occasional'
+        ELSE 'Active'
+    END AS customer_status
+FROM customers c
+LEFT JOIN transactions t ON c.customer_id = t.customer_id
+LEFT JOIN products p ON t.product_id = p.product_id
+GROUP BY c.customer_id, c.customer_name
+ORDER BY total_spent DESC;
+
+

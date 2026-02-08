@@ -1,4 +1,4 @@
-```bash
+```sql
 CREATE TABLE customers (
     customer_id NUMBER(5) PRIMARY KEY,
     customer_name VARCHAR2(50),

@@ -217,3 +217,27 @@ FROM transactions t
 JOIN products p ON t.product_id = p.product_id
 ORDER BY t.transaction_date;
 
+
+##LAG()
+SELECT
+    t.transaction_date,
+    (t.quantity * p.price) AS transaction_amount,
+    -- Get previous day's amount
+    LAG(t.quantity * p.price, 1) OVER (
+        ORDER BY t.transaction_date
+    ) AS previous_amount,
+    -- Calculate day-over-day change
+    (t.quantity * p.price) - LAG(t.quantity * p.price, 1) OVER (
+        ORDER BY t.transaction_date
+    ) AS day_over_day_change,
+    -- Calculate percentage growth
+    ROUND(
+        ((t.quantity * p.price) - LAG(t.quantity * p.price, 1) OVER (
+            ORDER BY t.transaction_date
+        )) / LAG(t.quantity * p.price, 1) OVER (
+            ORDER BY t.transaction_date
+        ) * 100, 2
+    ) AS growth_percentage
+FROM transactions t
+JOIN products p ON t.product_id = p.product_id
+ORDER BY t.transaction_date;

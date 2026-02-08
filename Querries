@@ -1,5 +1,5 @@
-```sql
-  CREATE TABLE customers (
+```bash
+CREATE TABLE customers (
     customer_id NUMBER(5) PRIMARY KEY,
     customer_name VARCHAR2(50),
     region VARCHAR2(20),
@@ -81,7 +81,7 @@ FROM (
 WHERE rank_per_region <= 5
 ORDER BY region, rank_per_region;
 
-
+##ROW_NUMBERS()
 
 
 -- Assign a unique row number to each product per region
@@ -105,7 +105,7 @@ ORDER BY region, row_num;
 
 
 
-DENSE
+##DENSE
 
 SELECT region,
        product_name,
@@ -179,7 +179,7 @@ ORDER BY transaction_date;
 
 
 
--- 1. Month-over-Month Sales Growth using LAG()
+ . Month-over-Month Sales Growth using LAG()
 SELECT 
     sales_month,
     monthly_sales,

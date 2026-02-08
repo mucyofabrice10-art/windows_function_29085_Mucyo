@@ -178,31 +178,16 @@ ORDER BY transaction_date;
 
 
 
+##MIN()
 
- . Month-over-Month Sales Growth using LAG()
-SELECT 
-    sales_month,
-    monthly_sales,
-    -- Fetch the sales figure from the previous row (previous month)
-    LAG(monthly_sales) OVER (ORDER BY sales_month) AS prev_month_sales,
-    -- Calculate the absolute growth (current - previous)
-    monthly_sales - LAG(monthly_sales) OVER (ORDER BY sales_month) AS sales_growth_abs,
-    -- Calculate the percentage growth
-    ROUND(
-        ((monthly_sales - LAG(monthly_sales) OVER (ORDER BY sales_month)) 
-         / LAG(monthly_sales) OVER (ORDER BY sales_month)) * 100, 
-        2
-    ) AS sales_growth_pct
-FROM (
-    -- First, calculate total sales per month
-    SELECT 
-        TO_CHAR(t.transaction_date, 'YYYY-MM') AS sales_month,
-        SUM(t.quantity * p.unit_price) AS monthly_sales
-    FROM transactions t
-    JOIN products p ON t.product_id = p.product_id
-    GROUP BY TO_CHAR(t.transaction_date, 'YYYY-MM')
-) monthly_data
-ORDER BY sales_month;
-
-
+SELECT
+    t.transaction_date,
+    (t.quantity * p.price) AS transaction_amount,
+    MIN(t.quantity * p.price) OVER (
+        ORDER BY t.transaction_date
+        RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS cumulative_min
+FROM transactions t
+JOIN products p ON t.product_id = p.product_id
+ORDER BY t.transaction_date;
 
